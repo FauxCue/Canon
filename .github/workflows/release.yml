@@ -89,7 +89,7 @@ jobs:
           RELEASE_VERSION="${{ steps.release_version.outputs.version }}"
           
           # Extract changes for this version from changelog
-          RELEASE_NOTES=$(sed -n "/^## v$RELEASE_VERSION/,/^## v/p" changelog/CHANGELOG.md | sed '1d;$d' | sed '/^[[:space:]]*$/d')
+          RELEASE_NOTES=$(sed -n "/^## v$RELEASE_VERSION/,/^## v/p" changelog/CHANGELOG.md | sed '$d' | sed '/^[[:space:]]*$/d')
           
           if [[ -z "$RELEASE_NOTES" ]]; then
             RELEASE_NOTES="No notes for v$RELEASE_VERSION"

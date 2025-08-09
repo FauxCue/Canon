@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.3 — Release Notes Title Fix
+
+- Updated release notes to include version title in GitHub releases
+- Release notes now show full changelog section with heading
+
 ## v0.3.2 — Release Notes Fix
 
 - Fixed release notes extraction in GitHub Actions workflow
