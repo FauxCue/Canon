@@ -1,0 +1,55 @@
+name: Question or Discussion
+description: Ask a question about the Canon or start a discussion
+title: "[Question]: "
+labels: ["question"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question about the Canon content or philosophy? Let's discuss!
+
+  - type: input
+    id: related-section
+    attributes:
+      label: Related Section (if applicable)
+      description: Which section does your question relate to?
+      placeholder: e.g., "sections/01-cosmogony.md" or "General philosophy"
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Your Question
+      description: What would you like to know or discuss?
+      placeholder: Ask your question here...
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context for your question.
+      placeholder: What prompted this question? What are you trying to understand?
+
+  - type: dropdown
+    id: question-type
+    attributes:
+      label: Question Type
+      description: What kind of question is this?
+      options:
+        - Clarification of existing content
+        - Philosophical discussion
+        - Practical application
+        - Historical context
+        - General inquiry
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-thoughts
+    attributes:
+      label: Additional Thoughts
+      description: Any other relevant information or thoughts.
+      placeholder: Anything else you'd like to add...

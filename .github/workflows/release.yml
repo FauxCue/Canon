@@ -1,0 +1,157 @@
+name: Create Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+        - patch
+        - minor
+        - major
+      release_description:
+        description: 'Release description (optional)'
+        required: false
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get current version
+        id: current_version
+        run: |
+          # Extract current version from changelog
+          if [[ -f "changelog/CHANGELOG.md" ]]; then
+            CURRENT_VERSION=$(grep -m 1 "^## v" changelog/CHANGELOG.md | sed 's/^## v\([0-9.]*\).*/\1/')
+            if [[ -z "$CURRENT_VERSION" ]]; then
+              CURRENT_VERSION="0.0.0"
+            fi
+          else
+            CURRENT_VERSION="0.0.0"
+          fi
+          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current version: $CURRENT_VERSION"
+
+      - name: Calculate next version
+        id: next_version
+        run: |
+          CURRENT="${{ steps.current_version.outputs.current }}"
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          
+          case $RELEASE_TYPE in
+            "major")
+              MAJOR=$((MAJOR + 1))
+              MINOR=0
+              PATCH=0
+              ;;
+            "minor")
+              MINOR=$((MINOR + 1))
+              PATCH=0
+              ;;
+            "patch")
+              PATCH=$((PATCH + 1))
+              ;;
+          esac
+          
+          NEXT_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "next=$NEXT_VERSION" >> $GITHUB_OUTPUT
+          echo "Next version: $NEXT_VERSION"
+
+      - name: Update changelog
+        run: |
+          NEXT_VERSION="${{ steps.next_version.outputs.next }}"
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          DESCRIPTION="${{ github.event.inputs.release_description }}"
+          DATE=$(date '+%Y-%m-%d')
+          
+          # Create new changelog entry
+          NEW_ENTRY="## v$NEXT_VERSION — $(date '+%B %d, %Y')\n\n"
+          if [[ -n "$DESCRIPTION" ]]; then
+            NEW_ENTRY="${NEW_ENTRY}- $DESCRIPTION\n"
+          else
+            case $RELEASE_TYPE in
+              "major")
+                NEW_ENTRY="${NEW_ENTRY}- Major version update\n"
+                ;;
+              "minor")
+                NEW_ENTRY="${NEW_ENTRY}- Minor version update\n"
+                ;;
+              "patch")
+                NEW_ENTRY="${NEW_ENTRY}- Patch version update\n"
+                ;;
+            esac
+          fi
+          NEW_ENTRY="${NEW_ENTRY}\n"
+          
+          # Insert new entry after the "# Changelog" header
+          if [[ -f "changelog/CHANGELOG.md" ]]; then
+            sed -i "2i\\$NEW_ENTRY" changelog/CHANGELOG.md
+          else
+            echo -e "# Changelog\n\n$NEW_ENTRY" > changelog/CHANGELOG.md
+          fi
+
+      - name: Commit changes
+        run: |
+          NEXT_VERSION="${{ steps.next_version.outputs.next }}"
+          git add changelog/CHANGELOG.md
+          git commit -m "chore: release v$NEXT_VERSION"
+          git push origin main
+
+      - name: Create Git tag
+        run: |
+          NEXT_VERSION="${{ steps.next_version.outputs.next }}"
+          git tag -a "v$NEXT_VERSION" -m "Release v$NEXT_VERSION"
+          git push origin "v$NEXT_VERSION"
+
+      - name: Generate release notes
+        id: release_notes
+        run: |
+          NEXT_VERSION="${{ steps.next_version.outputs.next }}"
+          DESCRIPTION="${{ github.event.inputs.release_description }}"
+          
+          # Extract changes for this version from changelog
+          RELEASE_NOTES=$(awk "/^## v$NEXT_VERSION/,/^## v/{if(/^## v$NEXT_VERSION/)next; if(/^## v/)exit; print}" changelog/CHANGELOG.md | sed '/^$/d')
+          
+          if [[ -z "$RELEASE_NOTES" ]]; then
+            if [[ -n "$DESCRIPTION" ]]; then
+              RELEASE_NOTES="$DESCRIPTION"
+            else
+              RELEASE_NOTES="Release v$NEXT_VERSION"
+            fi
+          fi
+          
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$RELEASE_NOTES" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.next_version.outputs.next }}
+          release_name: Release v${{ steps.next_version.outputs.next }}
+          body: ${{ steps.release_notes.outputs.notes }}
+          draft: false
+          prerelease: false

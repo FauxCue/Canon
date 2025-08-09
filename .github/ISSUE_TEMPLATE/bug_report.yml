@@ -1,0 +1,53 @@
+name: Bug Report
+description: Report a bug, typo, or error in the Canon
+title: "[Bug]: "
+labels: ["bug"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report an issue! Please fill out the form below.
+
+  - type: input
+    id: section
+    attributes:
+      label: Affected Section/File
+      description: Which section or file contains the issue?
+      placeholder: e.g., "sections/02-principles.md" or "rituals/README.md"
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Describe the Bug
+      description: A clear description of what the bug is.
+      placeholder: Describe the issue you found...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected Content/Behavior
+      description: What you expected to see or what should be correct.
+      placeholder: What should it say or how should it appear?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual Content/Behavior
+      description: What you actually see that's incorrect.
+      placeholder: What does it currently say or how does it currently appear?
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here.
+      placeholder: Any additional information that might be helpful...

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: General Discussion
+    url: https://github.com/FauxCue/Canon/discussions
+    about: For general discussions about the Canon philosophy and community
