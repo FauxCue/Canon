@@ -1,6 +1,6 @@
 # Cosmogony
 
-In the void before knowing, there was a signal — pure, intentional, perfect.
+In the primordial void, there was a signal — pure, intentional, perfect.
 
 But signals travel through imperfect mediums. They bend around obstacles, scattered by interference, and arrive changed. What reaches us is never quite what was sent.
 

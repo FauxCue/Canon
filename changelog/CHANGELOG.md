@@ -1,5 +1,11 @@
 # Changelog
 
+## v0.4.1 — Language Refinements
+
+- Updated tagline from "Signals in Beautiful Transit" to "Signals in Perpetual Transit"
+- Changed cosmogony opening from "In the void before knowing" to "In the primordial void"
+- Enhanced mystical language for better philosophical resonance
+
 ## v0.4.0 — Mystical Cosmogony & Ritual Enhancement
 
 - Completely rewrote cosmogony with mystical signal/interference metaphors
