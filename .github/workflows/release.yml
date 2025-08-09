@@ -36,109 +36,85 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Get current version
-        id: current_version
+      - name: Get changelog version
+        id: changelog_version
         run: |
-          # Extract current version from changelog
+          # Extract latest version from changelog (newest first)
           if [[ -f "changelog/CHANGELOG.md" ]]; then
-            CURRENT_VERSION=$(grep -m 1 "^## v" changelog/CHANGELOG.md | sed 's/^## v\([0-9.]*\).*/\1/')
-            if [[ -z "$CURRENT_VERSION" ]]; then
-              CURRENT_VERSION="0.0.0"
+            CHANGELOG_VERSION=$(grep -m 1 "^## v" changelog/CHANGELOG.md | sed 's/^## v\([0-9.]*\).*/\1/')
+            if [[ -z "$CHANGELOG_VERSION" ]]; then
+              CHANGELOG_VERSION="0.1.0"
             fi
           else
-            CURRENT_VERSION="0.0.0"
+            CHANGELOG_VERSION="0.1.0"
           fi
-          echo "current=$CURRENT_VERSION" >> $GITHUB_OUTPUT
-          echo "Current version: $CURRENT_VERSION"
+          echo "version=$CHANGELOG_VERSION" >> $GITHUB_OUTPUT
+          echo "Changelog version: $CHANGELOG_VERSION"
 
-      - name: Calculate next version
-        id: next_version
+      - name: Check if tag exists and calculate release version
+        id: release_version
         run: |
-          CURRENT="${{ steps.current_version.outputs.current }}"
+          CHANGELOG_VERSION="${{ steps.changelog_version.outputs.version }}"
           RELEASE_TYPE="${{ github.event.inputs.release_type }}"
           
-          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT"
+          # Check if tag already exists
+          if git rev-parse "v$CHANGELOG_VERSION" >/dev/null 2>&1; then
+            echo "Tag v$CHANGELOG_VERSION already exists, incrementing patch version"
+            IFS='.' read -r MAJOR MINOR PATCH <<< "$CHANGELOG_VERSION"
+            PATCH=$((PATCH + 1))
+            RELEASE_VERSION="$MAJOR.$MINOR.$PATCH"
+          else
+            echo "Using changelog version: $CHANGELOG_VERSION"
+            RELEASE_VERSION="$CHANGELOG_VERSION"
+          fi
           
-          case $RELEASE_TYPE in
-            "major")
-              MAJOR=$((MAJOR + 1))
-              MINOR=0
-              PATCH=0
-              ;;
-            "minor")
-              MINOR=$((MINOR + 1))
-              PATCH=0
-              ;;
-            "patch")
-              PATCH=$((PATCH + 1))
-              ;;
-          esac
-          
-          NEXT_VERSION="$MAJOR.$MINOR.$PATCH"
-          echo "next=$NEXT_VERSION" >> $GITHUB_OUTPUT
-          echo "Next version: $NEXT_VERSION"
+          echo "version=$RELEASE_VERSION" >> $GITHUB_OUTPUT
+          echo "Release version: $RELEASE_VERSION"
 
-      - name: Update changelog
+      - name: Update changelog (if needed)
         run: |
-          NEXT_VERSION="${{ steps.next_version.outputs.next }}"
-          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          RELEASE_VERSION="${{ steps.release_version.outputs.version }}"
+          CHANGELOG_VERSION="${{ steps.changelog_version.outputs.version }}"
           DESCRIPTION="${{ github.event.inputs.release_description }}"
-          DATE=$(date '+%Y-%m-%d')
           
-          # Create new changelog entry
-          NEW_ENTRY="## v$NEXT_VERSION — $(date '+%B %d, %Y')\n\n"
-          if [[ -n "$DESCRIPTION" ]]; then
-            NEW_ENTRY="${NEW_ENTRY}- $DESCRIPTION\n"
-          else
-            case $RELEASE_TYPE in
-              "major")
-                NEW_ENTRY="${NEW_ENTRY}- Major version update\n"
-                ;;
-              "minor")
-                NEW_ENTRY="${NEW_ENTRY}- Minor version update\n"
-                ;;
-              "patch")
-                NEW_ENTRY="${NEW_ENTRY}- Patch version update\n"
-                ;;
-            esac
-          fi
-          NEW_ENTRY="${NEW_ENTRY}\n"
-          
-          # Insert new entry after the "# Changelog" header
-          if [[ -f "changelog/CHANGELOG.md" ]]; then
+          # Only update changelog if we're incrementing from an existing tag
+          if [[ "$RELEASE_VERSION" != "$CHANGELOG_VERSION" ]]; then
+            echo "Updating changelog for incremented version $RELEASE_VERSION"
+            
+            NEW_ENTRY="## v$RELEASE_VERSION — $(date '+%B %d, %Y')\n\n"
+            if [[ -n "$DESCRIPTION" ]]; then
+              NEW_ENTRY="${NEW_ENTRY}- $DESCRIPTION\n"
+            else
+              NEW_ENTRY="${NEW_ENTRY}- Patch version update\n"
+            fi
+            NEW_ENTRY="${NEW_ENTRY}\n"
+            
+            # Insert new entry at the top (after header)
             sed -i "2i\\$NEW_ENTRY" changelog/CHANGELOG.md
+            
+            git add changelog/CHANGELOG.md
+            git commit -m "chore: release v$RELEASE_VERSION"
+            git push origin main
           else
-            echo -e "# Changelog\n\n$NEW_ENTRY" > changelog/CHANGELOG.md
+            echo "Using existing changelog entry for version $RELEASE_VERSION"
           fi
-
-      - name: Commit changes
-        run: |
-          NEXT_VERSION="${{ steps.next_version.outputs.next }}"
-          git add changelog/CHANGELOG.md
-          git commit -m "chore: release v$NEXT_VERSION"
-          git push origin main
 
       - name: Create Git tag
         run: |
-          NEXT_VERSION="${{ steps.next_version.outputs.next }}"
-          git tag -a "v$NEXT_VERSION" -m "Release v$NEXT_VERSION"
-          git push origin "v$NEXT_VERSION"
+          RELEASE_VERSION="${{ steps.release_version.outputs.version }}"
+          git tag -a "v$RELEASE_VERSION" -m "Release v$RELEASE_VERSION"
+          git push origin "v$RELEASE_VERSION"
 
       - name: Generate release notes
         id: release_notes
         run: |
-          NEXT_VERSION="${{ steps.next_version.outputs.next }}"
-          DESCRIPTION="${{ github.event.inputs.release_description }}"
+          RELEASE_VERSION="${{ steps.release_version.outputs.version }}"
           
           # Extract changes for this version from changelog
-          RELEASE_NOTES=$(awk "/^## v$NEXT_VERSION/,/^## v/{if(/^## v$NEXT_VERSION/)next; if(/^## v/)exit; print}" changelog/CHANGELOG.md | sed '/^$/d')
+          RELEASE_NOTES=$(awk "/^## v$RELEASE_VERSION/,/^## v/{if(/^## v$RELEASE_VERSION/)next; if(/^## v/)exit; print}" changelog/CHANGELOG.md | sed '/^$/d')
           
           if [[ -z "$RELEASE_NOTES" ]]; then
-            if [[ -n "$DESCRIPTION" ]]; then
-              RELEASE_NOTES="$DESCRIPTION"
-            else
-              RELEASE_NOTES="Release v$NEXT_VERSION"
-            fi
+            RELEASE_NOTES="Release v$RELEASE_VERSION"
           fi
           
           echo "notes<<EOF" >> $GITHUB_OUTPUT
@@ -150,8 +126,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: v${{ steps.next_version.outputs.next }}
-          release_name: Release v${{ steps.next_version.outputs.next }}
+          tag_name: v${{ steps.release_version.outputs.version }}
+          release_name: Release v${{ steps.release_version.outputs.version }}
           body: ${{ steps.release_notes.outputs.notes }}
           draft: false
           prerelease: false

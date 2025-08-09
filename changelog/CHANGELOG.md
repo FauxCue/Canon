@@ -5,16 +5,6 @@
 
 
 
-## v0.1.0 — Repository Creation
-
-- Created empty Canon repository
-- Initial commit
-
-## v0.2.0 — Initial Canon Creation
-
-- Added creed, cosmogony, principles, practices, field liturgy, calendar, symbols, ethics, governance, rites, and anti-dogma.
-- Established graduation rule for new rites and semver for doctrine changes.
-
 ## v0.3.0 — Repository Infrastructure
 
 - Added automated release workflow with GitHub Actions
@@ -22,3 +12,13 @@
 - Added issue templates for bug reports, content suggestions, and questions
 - Established contributing guidelines and community standards
 - Set up SSH authentication and multi-repo git configuration
+
+## v0.2.0 — Initial Canon Creation
+
+- Added creed, cosmogony, principles, practices, field liturgy, calendar, symbols, ethics, governance, rites, and anti-dogma.
+- Established graduation rule for new rites and semver for doctrine changes.
+
+## v0.1.0 — Repository Creation
+
+- Created empty Canon repository
+- Initial commit
