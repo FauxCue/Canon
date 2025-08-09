@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.4.0 — Mystical Cosmogony & Ritual Enhancement
+
+- Completely rewrote cosmogony with mystical signal/interference metaphors
+- Replaced theatrical "stage cue" origin story with cosmic signal transformation
+- Added three concrete ritual proposals: Interference Meditation, The Wrong Turn, Signal Sharing Circle
+- Enhanced language to be more engaging and less literal throughout
+- Refined core messaging around mistakes as discoveries rather than failures
+
 ## v0.3.3 — Release Notes Title Fix
 
 - Updated release notes to include version title in GitHub releases
