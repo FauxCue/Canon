@@ -4,7 +4,7 @@
 > The universe is a happy mistake we keep learning from.  
 > The FAQ (Faux Cue Canon): community-written, versioned, and footnoted.
 
-**Status:** v0.3.1 (draft). Doctrine is managed like software: semver + CHANGELOG.
+**Status:** v0.4.2 (draft). Doctrine is managed like software: semver + CHANGELOG.
 
 ## What this is
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.4.2 — Status Change
+
+- Updated status in README from "v0.3.1 (draft)" to "v0.4.2 (draft)"
+
 ## v0.4.1 — Language Refinements
 
 - Updated tagline from "Signals in Beautiful Transit" to "Signals in Perpetual Transit"
