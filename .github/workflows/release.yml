@@ -89,10 +89,10 @@ jobs:
           RELEASE_VERSION="${{ steps.release_version.outputs.version }}"
           
           # Extract changes for this version from changelog
-          RELEASE_NOTES=$(awk "/^## v$RELEASE_VERSION/,/^## v/{if(/^## v$RELEASE_VERSION/)next; if(/^## v/)exit; print}" changelog/CHANGELOG.md | sed '/^$/d')
+          RELEASE_NOTES=$(sed -n "/^## v$RELEASE_VERSION/,/^## v/p" changelog/CHANGELOG.md | sed '1d;$d' | sed '/^[[:space:]]*$/d')
           
           if [[ -z "$RELEASE_NOTES" ]]; then
-            RELEASE_NOTES="Release v$RELEASE_VERSION"
+            RELEASE_NOTES="No notes for v$RELEASE_VERSION"
           fi
           
           echo "notes<<EOF" >> $GITHUB_OUTPUT
@@ -103,7 +103,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.release_version.outputs.version }}
-          name: Release v${{ steps.release_version.outputs.version }}
+          name: v${{ steps.release_version.outputs.version }}
           body: ${{ steps.release_notes.outputs.notes }}
           draft: false
           prerelease: false

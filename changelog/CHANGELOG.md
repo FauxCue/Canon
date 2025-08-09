@@ -1,5 +1,10 @@
 # Changelog
 
+## v0.3.2 — Release Notes Fix
+
+- Fixed release notes extraction in GitHub Actions workflow
+- Improved changelog parsing to properly generate release descriptions
+
 ## v0.3.1 — Release Workflow Improvements
 
 - Fixed deprecated set-output warnings in GitHub Actions
