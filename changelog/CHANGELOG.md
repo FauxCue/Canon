@@ -1,9 +1,4 @@
 # Changelog
-## v0.2.0 — August 09, 2025
-
-- v0.3.0 — Repository Infrastructure
-
-
 
 ## v0.3.0 — Repository Infrastructure
 
