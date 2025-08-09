@@ -1,5 +1,12 @@
 # Changelog
 
+## v0.3.1 — Release Workflow Improvements
+
+- Fixed deprecated set-output warnings in GitHub Actions
+- Simplified release workflow to use changelog data directly
+- Removed manual input requirements for releases
+- Updated to modern softprops/action-gh-release@v2
+
 ## v0.3.0 — Repository Infrastructure
 
 - Added automated release workflow with GitHub Actions

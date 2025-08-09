@@ -2,20 +2,6 @@ name: Create Release
 
 on:
   workflow_dispatch:
-    inputs:
-      release_type:
-        description: 'Release type'
-        required: true
-        default: 'patch'
-        type: choice
-        options:
-        - patch
-        - minor
-        - major
-      release_description:
-        description: 'Release description (optional)'
-        required: false
-        type: string
 
 jobs:
   release:
@@ -55,7 +41,6 @@ jobs:
         id: release_version
         run: |
           CHANGELOG_VERSION="${{ steps.changelog_version.outputs.version }}"
-          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
           
           # Check if tag already exists
           if git rev-parse "v$CHANGELOG_VERSION" >/dev/null 2>&1; then
@@ -75,19 +60,12 @@ jobs:
         run: |
           RELEASE_VERSION="${{ steps.release_version.outputs.version }}"
           CHANGELOG_VERSION="${{ steps.changelog_version.outputs.version }}"
-          DESCRIPTION="${{ github.event.inputs.release_description }}"
           
           # Only update changelog if we're incrementing from an existing tag
           if [[ "$RELEASE_VERSION" != "$CHANGELOG_VERSION" ]]; then
             echo "Updating changelog for incremented version $RELEASE_VERSION"
             
-            NEW_ENTRY="## v$RELEASE_VERSION — $(date '+%B %d, %Y')\n\n"
-            if [[ -n "$DESCRIPTION" ]]; then
-              NEW_ENTRY="${NEW_ENTRY}- $DESCRIPTION\n"
-            else
-              NEW_ENTRY="${NEW_ENTRY}- Patch version update\n"
-            fi
-            NEW_ENTRY="${NEW_ENTRY}\n"
+            NEW_ENTRY="## v$RELEASE_VERSION — $(date '+%B %d, %Y')\n\n- Patch version update\n\n"
             
             # Insert new entry at the top (after header)
             sed -i "2i\\$NEW_ENTRY" changelog/CHANGELOG.md
@@ -122,12 +100,10 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.release_version.outputs.version }}
-          release_name: Release v${{ steps.release_version.outputs.version }}
+          name: Release v${{ steps.release_version.outputs.version }}
           body: ${{ steps.release_notes.outputs.notes }}
           draft: false
           prerelease: false
