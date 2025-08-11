@@ -1,9 +1,9 @@
 # Core Practices
 
-- **The Ask (daily):** Ask three honest questions before any strong opinion.
+- **The Ask (daily):** Ask honest questions before any strong opinion.
 - **The Patch (weekly):** Repair one thing you broke or neglected.
-- **Feast of Little Wins (anytime):** Share one tiny success; cheer loudly.
-- **The Burn (monthly):** Let go of one unhelpful belief, item, or grudge.
+- **Feast of Small Successes (anytime):** Share one small success; cheer loudly.
+- **The Burn (often):** Let go of one unhelpful belief, item, or grudge.
 - **Signal & Noise (optional):** 24 hours without doomscrolling; note what remains.
 - **Fellowship of Hands (service):** Give ~10% of discretionary energy to help someone else.
 

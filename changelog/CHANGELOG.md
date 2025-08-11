@@ -1,5 +1,13 @@
 # Changelog
 
+## v0.4.3 — Language Refinements
+
+- Updated "beautiful collision" to "billions of collisions" in cosmogony
+- Simplified The Ask practice: "three honest questions" to "honest questions"  
+- Renamed "Feast of Little Wins" to "Feast of Small Successes"
+- Updated practice descriptions: "tiny" to "small" successes
+- Changed The Burn frequency from "monthly" to "often"
+
 ## v0.4.2 — Status Change
 
 - Updated status in README from "v0.3.1 (draft)" to "v0.4.2 (draft)"
